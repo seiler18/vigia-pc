@@ -20,6 +20,18 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // Un error al pintar una lectura rara no debe cerrar el monitor en
+        // plena partida: se anota y la lectura siguiente vuelve a intentarlo.
+        DispatcherUnhandledException += (_, a) =>
+        {
+            Registro.Anotar("Error en la interfaz", a.Exception);
+            a.Handled = true;
+        };
+        AppDomain.CurrentDomain.UnhandledException += (_, a) =>
+        {
+            if (a.ExceptionObject is Exception ex) Registro.Anotar("Error fatal", ex);
+        };
+
         // Una sola instancia: con «Iniciar con Windows» activo es fácil abrir
         // una segunda sin darse cuenta, y serían dos franjas y dos sesiones ETW.
         _unica = new Mutex(true, @"Local\Vigia-instancia-unica", out bool esPrimera);

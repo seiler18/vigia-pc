@@ -38,18 +38,24 @@ internal sealed class Recolector : IDisposable
     public void Iniciar()
     {
         _fps.Iniciar();
-        _ = Task.Run(async () =>
+        _bucle = Task.Run(async () =>
         {
             // Los contadores de tasa (carga) necesitan dos muestras.
             _consulta.Recolectar();
             using var reloj = new PeriodicTimer(TimeSpan.FromSeconds(1));
-            while (await reloj.WaitForNextTickAsync(_cancelar.Token).ConfigureAwait(false))
+            try
             {
-                try { NuevaLectura?.Invoke(Leer()); }
-                catch (Exception e) { Debug.WriteLine(e); }
+                while (await reloj.WaitForNextTickAsync(_cancelar.Token).ConfigureAwait(false))
+                {
+                    try { NuevaLectura?.Invoke(Leer()); }
+                    catch (Exception e) { Registro.Anotar("Error al leer los sensores", e); }
+                }
             }
-        }, _cancelar.Token);
+            catch (OperationCanceledException) { }
+        });
     }
+
+    private Task? _bucle;
 
     public Lectura Leer()
     {
@@ -67,15 +73,21 @@ internal sealed class Recolector : IDisposable
         if (pid == 0 || pid == _pidPropio) return;
         try
         {
-            if (NoSonJuegos.Contains(Process.GetProcessById(pid).ProcessName)) return;
+            using var proceso = Process.GetProcessById(pid);
+            if (NoSonJuegos.Contains(proceso.ProcessName)) return;
         }
-        catch (ArgumentException) { return; }
+        catch (Exception e) when (e is ArgumentException or InvalidOperationException) { return; }
         _pidJuego = pid;
     }
 
     public void Dispose()
     {
+        // Se espera a que termine la lectura en curso antes de cerrar los
+        // handles: cerrar la consulta PDH a mitad de una recolección es
+        // comportamiento indefinido en código nativo.
         _cancelar.Cancel();
+        try { _bucle?.Wait(TimeSpan.FromSeconds(2)); }
+        catch (AggregateException) { }
         _fps.Dispose();
         _gpu.Dispose();
         _consulta.Dispose();

@@ -135,8 +135,12 @@ internal sealed class SensorFps : IDisposable
             if (_nombres.TryGetValue(pid, out var n)) return n;
         }
         string nombre;
-        try { nombre = Process.GetProcessById(pid).ProcessName; }
-        catch { nombre = $"proceso {pid}"; }
+        try
+        {
+            using var proceso = Process.GetProcessById(pid);
+            nombre = proceso.ProcessName;
+        }
+        catch (Exception e) when (e is ArgumentException or InvalidOperationException) { nombre = $"proceso {pid}"; }
         lock (_cerrojo) _nombres[pid] = nombre;
         return nombre;
     }

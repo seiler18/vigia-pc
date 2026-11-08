@@ -56,6 +56,17 @@ src/Vigia/
   `.csproj` las quita con el target `QuitarNativosDeTraceEvent`.
 - Los FPS necesitan grupo «Usuarios del registro de rendimiento» o admin. El
   usuario de este equipo ya está en el grupo.
+- **Sesión ETW huérfana**: si Vigía se mata a la fuerza (Administrador de
+  tareas), la sesión `Vigia-FPS` sigue viva hasta el próximo arranque de
+  Vigía (que la reemplaza) o el reinicio. A mano: `logman stop Vigia-FPS -ets`.
+  Al salir por la bandeja se cierra sola.
+- **Nada debe tumbar la franja**: `config.json` se normaliza al cargar (umbral
+  nulo o invertido, opacidad fuera de rango, borde desconocido → por
+  defecto), `Guardar()` no lanza, y los errores de interfaz y de sensores van
+  a `%APPDATA%\Vigia\errores.log` (recortado a 256 KB) en vez de cerrar la app.
+- **Dependencias con candado**: `src/Vigia/packages.lock.json` va en git y CI
+  restaura con `--locked-mode`. Tras cambiar un paquete, `dotnet restore` y
+  commitear el candado junto con el `.csproj`.
 
 ## Comandos
 
@@ -66,7 +77,12 @@ dotnet run --project src/Vigia
 
 Instalar en este PC: skill `instalar-local`. Publicar versión: skill
 `publicar-version` (el tag `vX.Y.Z` dispara `publicar.yml`, que sube
-`Vigia.exe` autónomo a Releases).
+`Vigia.exe` autónomo, su `.sha256` y una atestación de procedencia).
+
+El `.exe` no va firmado; la atestación lo compensa: prueba que ese archivo lo
+compiló el workflow de este repo. Los dos jobs de `publicar.yml` van
+separados (el que compila no escribe, el que publica no ejecuta código del
+repo): no juntarlos.
 
 ## Verificación
 

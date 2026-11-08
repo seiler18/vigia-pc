@@ -49,9 +49,9 @@ public sealed class Configuracion
         try
         {
             if (File.Exists(Ruta))
-                return JsonSerializer.Deserialize<Configuracion>(File.ReadAllText(Ruta)) ?? new();
+                return (JsonSerializer.Deserialize<Configuracion>(File.ReadAllText(Ruta)) ?? new()).Normalizada();
         }
-        catch (JsonException)
+        catch (Exception e) when (e is JsonException or IOException or UnauthorizedAccessException)
         {
             // Un JSON roto a mano no debe impedir que Vigía arranque: se usan
             // los valores por defecto y el archivo se reescribe al guardar.
@@ -59,9 +59,36 @@ public sealed class Configuracion
         return new();
     }
 
+    /// <summary>
+    /// El archivo se edita a mano: un umbral en null o una opacidad de 5 no
+    /// pueden tumbar a Vigía (se evalúa cada segundo; un null ahí sería una
+    /// caída por segundo). Lo inválido vuelve al valor por defecto.
+    /// </summary>
+    private Configuracion Normalizada()
+    {
+        var porDefecto = new Configuracion();
+        TemperaturaGpu = Valido(TemperaturaGpu, 30, 120) ? TemperaturaGpu : porDefecto.TemperaturaGpu;
+        TemperaturaCpu = Valido(TemperaturaCpu, 30, 120) ? TemperaturaCpu : porDefecto.TemperaturaCpu;
+        Ram = Valido(Ram, 10, 100) ? Ram : porDefecto.Ram;
+        Opacidad = double.IsFinite(Opacidad) ? Math.Clamp(Opacidad, 0.3, 1) : porDefecto.Opacidad;
+        if (Borde is not ("Arriba" or "Abajo")) Borde = porDefecto.Borde;
+        return this;
+    }
+
+    private static bool Valido(Umbral? u, double min, double max) =>
+        u is not null && u.Atencion >= min && u.Critico <= max && u.Atencion <= u.Critico;
+
+    /// <summary>No lanza: no poder guardar la posición no es motivo para cerrar el monitor en plena partida.</summary>
     public void Guardar()
     {
-        Directory.CreateDirectory(Carpeta);
-        File.WriteAllText(Ruta, JsonSerializer.Serialize(this, Formato));
+        try
+        {
+            Directory.CreateDirectory(Carpeta);
+            File.WriteAllText(Ruta, JsonSerializer.Serialize(this, Formato));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            Registro.Anotar("No se pudo guardar la configuración", e);
+        }
     }
 }

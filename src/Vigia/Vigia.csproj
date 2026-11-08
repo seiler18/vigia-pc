@@ -15,6 +15,13 @@
     <Version>0.1.0</Version>
     <Authors>Jesus Seiler</Authors>
     <SatelliteResourceLanguages>es</SatelliteResourceLanguages>
+    <!-- packages.lock.json fija la versión exacta y el hash de cada paquete,
+         directo y transitivo. En CI se restaura con locked-mode: si algo no
+         coincide, falla en vez de compilar con una dependencia que nadie probó.
+         RuntimeIdentifiers mete en el candado también lo que usa la
+         publicación autónoma para win-x64. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>

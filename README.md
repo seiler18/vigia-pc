@@ -70,7 +70,32 @@ Al entrar en crítico, Windows muestra un aviso (uno cada 5 minutos por motivo).
 ## Instalar
 
 Descarga `Vigia.exe` de [Releases](../../releases) y ábrelo; no necesita nada
-más. Windows SmartScreen puede advertir que el programa no está firmado.
+más ni se instala: es un solo archivo. Para quitarlo, se cierra desde la
+bandeja y se borra el archivo (y `%APPDATA%\Vigia` si se quiere borrar la
+configuración).
+
+### Comprobar la descarga
+
+El `.exe` no está firmado con un certificado de código, así que Windows
+SmartScreen puede advertir al abrirlo («Más información» → «Ejecutar de todas
+formas»). En su lugar, cada versión trae dos formas de comprobar que el
+archivo es el que compiló GitHub desde este repositorio y que nadie lo
+cambió:
+
+```powershell
+# 1. El hash coincide con el publicado en la release
+(Get-FileHash .\Vigia.exe -Algorithm SHA256).Hash   # comparar con Vigia.exe.sha256
+
+# 2. La atestación de procedencia (requiere la CLI de GitHub)
+gh attestation verify .\Vigia.exe -R seiler18/vigia-pc
+```
+
+## Privacidad
+
+Vigía no se conecta a internet, no envía datos y no guarda historial: lo que
+lee se queda en la memoria mientras está abierto. En disco solo escribe su
+configuración y, si algo falla, un registro de errores, ambos en
+`%APPDATA%\Vigia\`.
 
 ## Límites conocidos
 
