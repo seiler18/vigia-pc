@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <!-- Solo por NotifyIcon: WPF no trae icono de bandeja propio. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>Vigia</AssemblyName>
+    <Product>Vigía</Product>
+    <Version>0.1.0</Version>
+    <Authors>Jesus Seiler</Authors>
+    <SatelliteResourceLanguages>es</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Choque de nombres al usar WPF y WinForms juntos: se quitan los usings
+         implícitos de WinForms y se nombran a mano donde hacen falta. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.2.8" />
+  </ItemGroup>
+
+  <!-- TraceEvent copia KernelTraceControl y msdia140 (2,5 MB por arquitectura)
+       para sesiones del kernel y símbolos. Vigía solo escucha proveedores de
+       usuario (DXGI, D3D9), que no los cargan: comprobado sin ellos, los FPS
+       se leen igual. -->
+  <Target Name="QuitarNativosDeTraceEvent" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <None Remove="@(None)" Condition="$([System.String]::Copy('%(None.Link)').StartsWith('amd64\')) Or $([System.String]::Copy('%(None.Link)').StartsWith('x86\')) Or $([System.String]::Copy('%(None.Link)').StartsWith('arm64\'))" />
+    </ItemGroup>
+  </Target>
+
+</Project>

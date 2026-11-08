@@ -1,0 +1,42 @@
+<Window x:Class="Vigia.Interfaz.Franja"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="clr-namespace:Vigia.Interfaz"
+        Title="Vigía"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize" ShowActivated="False"
+        Width="1200" Height="30"
+        FontFamily="Segoe UI Variable Text, Segoe UI"
+        TextOptions.TextFormattingMode="Display"
+        MouseLeftButtonDown="AlPresionar" MouseDoubleClick="AlDobleClic">
+
+    <!-- Fondo con alfa propio en vez de Window.Opacity: se transparenta la
+         franja sin que el texto pierda contraste. -->
+    <Grid x:Name="Fondo">
+        <!-- Línea de estado en el borde que mira hacia la pantalla: gris si
+             todo va bien, ámbar o roja si hay que mirar. -->
+        <Border x:Name="LineaEstado" Height="2" VerticalAlignment="Bottom" />
+
+        <Grid Margin="14,0,14,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Ellipse x:Name="PuntoEstado" Width="9" Height="9" VerticalAlignment="Center" Margin="0,1,9,0" />
+                <TextBlock x:Name="TextoEstado" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <!-- FPS no lleva tendencia: no hay umbral que vigilar, y su
+                 detalle útil es el 1 % bajo (los tirones) y de qué juego es. -->
+            <i:Segmento x:Name="SegFps" Grid.Column="1" TituloTexto="FPS" />
+            <i:Segmento x:Name="SegGpu" Grid.Column="2" TituloTexto="GPU" />
+            <i:Segmento x:Name="SegCpu" Grid.Column="3" TituloTexto="CPU" />
+            <i:Segmento x:Name="SegRam" Grid.Column="4" TituloTexto="RAM" />
+        </Grid>
+    </Grid>
+</Window>

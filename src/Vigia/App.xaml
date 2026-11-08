@@ -1,0 +1,12 @@
+﻿<Application x:Class="Vigia.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <SolidColorBrush x:Key="TextoPrincipal" Color="#E8EAED" />
+        <SolidColorBrush x:Key="TextoSecundario" Color="#9AA0A6" />
+        <SolidColorBrush x:Key="TextoTenue" Color="#6B7280" />
+        <SolidColorBrush x:Key="FondoBarra" Color="#33FFFFFF" />
+        <SolidColorBrush x:Key="Separador" Color="#22FFFFFF" />
+    </Application.Resources>
+</Application>

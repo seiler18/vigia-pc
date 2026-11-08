@@ -1,0 +1,29 @@
+# Dependabot: avisa de dependencias vulnerables o viejas y abre el PR que las
+# actualiza. Las menores y de parche van juntas en un PR por semana; las
+# mayores, cada una por su lado, porque son las que rompen.
+#
+# Las actualizaciones de seguridad se encienden en Settings → Code security;
+# este archivo gobierna las de versión. Los workflows fijan las acciones por
+# SHA con el comentario de la versión: no quitar el comentario.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "08:00"
+      timezone: America/Santiago
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+    groups:
+      menores-y-parches:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
