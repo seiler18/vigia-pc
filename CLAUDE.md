@@ -65,8 +65,11 @@ src/Vigia/
   defecto), `Guardar()` no lanza, y los errores de interfaz y de sensores van
   a `%APPDATA%\Vigia\errores.log` (recortado a 256 KB) en vez de cerrar la app.
 - **Dependencias con candado**: `src/Vigia/packages.lock.json` va en git y CI
-  restaura con `--locked-mode`. Tras cambiar un paquete, `dotnet restore` y
-  commitear el candado junto con el `.csproj`.
+  restaura con `--locked-mode`. Tras cambiar un paquete, borrar `obj/`,
+  `dotnet restore Vigia.slnx --force-evaluate` y commitear el candado junto
+  con el `.csproj`. Con un `obj/` sucio de un `publish` anterior el candado
+  arrastra referencias implícitas (`Microsoft.NET.ILLink.Tasks`) que el
+  servidor no tiene, y CI falla con `NU1004` (pasó el 2026-11-07).
 
 ## Comandos
 
