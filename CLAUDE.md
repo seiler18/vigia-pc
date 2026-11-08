@@ -96,7 +96,14 @@ colores del logo hay que revisar esas dos constantes.
 - **TraceEvent copia DLL nativas** (`amd64\`, `x86\`) que Vigía no usa; el
   `.csproj` las quita con el target `QuitarNativosDeTraceEvent`.
 - Los FPS necesitan grupo «Usuarios del registro de rendimiento» o admin. El
-  usuario de este equipo ya está en el grupo.
+  usuario de este equipo ya está en el grupo, así que **la sección «FPS» de
+  Personalizar aquí nunca se ve** (`PermisoFps.Tiene()` mira el token). El
+  botón «Activar FPS» corre `Add-LocalGroupMember` en una PowerShell elevada
+  (UAC), con el usuario por SID y el script en `-EncodedCommand`. No se pudo
+  probar de punta a punta en este equipo: solo la sintaxis del script.
+  «Ya es miembro» se reconoce por `FullyQualifiedErrorId -like 'MemberExists*'`
+  y no con `catch [MemberExistsException]`, porque ese tipo no existe hasta
+  que se carga el módulo LocalAccounts.
 - **Sesión ETW huérfana**: si Vigía se mata a la fuerza (Administrador de
   tareas), la sesión `Vigia-FPS` sigue viva hasta el próximo arranque de
   Vigía (que la reemplaza) o el reinicio. A mano: `logman stop Vigia-FPS -ets`.

@@ -39,7 +39,31 @@ public partial class Ajustes : Window
         CrearUmbral(2, "CPU", () => _config.TemperaturaCpu, 50, 110, "°");
         CrearUmbral(3, "RAM", () => _config.Ram, 50, 100, " %");
         Cargar();
+        SeccionFps.Visibility = Sensores.PermisoFps.Tiene() ? Visibility.Collapsed : Visibility.Visible;
         Closed += (_, _) => _config.Guardar();
+    }
+
+    private async void AlActivarFps(object sender, RoutedEventArgs e)
+    {
+        BotonFps.IsEnabled = false;
+        var resultado = await Sensores.PermisoFps.ConcederAsync();
+        switch (resultado)
+        {
+            case Sensores.PermisoFps.Resultado.Listo:
+                // El permiso entra en el token de la sesión: hasta volver a
+                // entrar, Windows sigue sin dejar abrir la sesión ETW.
+                TextoFps.Text = "Listo. Cierra la sesión de Windows y vuelve a entrar para que los FPS aparezcan.";
+                BotonFps.Visibility = Visibility.Collapsed;
+                break;
+            case Sensores.PermisoFps.Resultado.Cancelado:
+                TextoFps.Text = "No se activó: Windows necesita tu confirmación para dar el permiso.";
+                BotonFps.IsEnabled = true;
+                break;
+            default:
+                TextoFps.Text = "No se pudo activar. Otra opción: abrir Vigía con clic derecho → «Ejecutar como administrador».";
+                BotonFps.IsEnabled = true;
+                break;
+        }
     }
 
     /// <summary>

@@ -76,9 +76,12 @@ a mano, se aplica al guardar.
 ## Requisitos
 
 - Windows 10 u 11 de 64 bits.
-- Para los FPS: ser administrador **o** estar en el grupo «Usuarios del
-  registro de rendimiento» (`Performance Log Users`). Sin eso, Vigía funciona
-  igual y la casilla de FPS lo dice.
+- Para los FPS, un permiso de Windows que se da una sola vez. Si falta, la
+  franja dice «sin permiso · doble clic para activarlo»: en Personalizar,
+  **Activar FPS** pide la confirmación de Windows y agrega al usuario al grupo
+  «Usuarios del registro de rendimiento» (`Performance Log Users`). Después
+  hay que cerrar la sesión de Windows y volver a entrar. Todo lo demás
+  funciona sin ese permiso.
 - Los juegos se ven encima de la franja solo en **ventana sin bordes**. En
   pantalla completa exclusiva el juego la tapa: ahí conviene dejarla en otra
   pantalla.

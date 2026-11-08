@@ -60,7 +60,9 @@ internal sealed class SensorFps : IDisposable
         }
         catch (UnauthorizedAccessException)
         {
-            Error = "Sin permiso para leer FPS: agrega tu usuario al grupo «Usuarios del registro de rendimiento».";
+            // Corto porque va en la franja; el doble clic abre «Personalizar»,
+            // donde está el botón que da el permiso (ver PermisoFps).
+            Error = "sin permiso · doble clic para activarlo";
         }
         catch (Exception e)
         {

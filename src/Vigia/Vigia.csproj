@@ -14,7 +14,7 @@
     <ApplicationIcon>Recursos\vigia.ico</ApplicationIcon>
     <AssemblyName>Vigia</AssemblyName>
     <Product>Vigía</Product>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Authors>Jesus Seiler</Authors>
     <SatelliteResourceLanguages>es</SatelliteResourceLanguages>
     <!-- packages.lock.json fija la versión exacta y el hash de cada paquete,

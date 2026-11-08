@@ -45,6 +45,16 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="20,0,20,16">
 
+                <!-- Solo aparece si a este usuario le falta el permiso: quien ya
+                     lo tiene no necesita leer nada de esto. -->
+                <StackPanel x:Name="SeccionFps" Visibility="Collapsed">
+                    <TextBlock Text="FPS" Style="{StaticResource Seccion}" />
+                    <TextBlock x:Name="TextoFps" TextWrapping="Wrap" Margin="0,0,0,10"
+                               Text="Para leer los FPS, Windows pide un permiso que se da una sola vez." />
+                    <Button x:Name="BotonFps" Content="Activar FPS" Click="AlActivarFps"
+                            HorizontalAlignment="Left" MinWidth="120" />
+                </StackPanel>
+
                 <TextBlock Text="Posición" Style="{StaticResource Seccion}" />
                 <WrapPanel x:Name="Bordes">
                     <RadioButton Content="Arriba" Tag="Arriba" GroupName="borde" Margin="0,0,16,0" Checked="AlElegirBorde" />
