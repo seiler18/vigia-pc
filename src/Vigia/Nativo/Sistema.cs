@@ -51,6 +51,10 @@ internal static partial class Sistema
         if (ventana != 0) SetWindowPos(ventana, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
 
+    /// <summary>Mueve sin cambiar tamaño ni orden, en píxeles físicos.</summary>
+    public static void Mover(nint ventana, int x, int y) =>
+        SetWindowPos(ventana, 0, x, y, 0, 0, SWP_NOSIZE | 0x4 /* SWP_NOZORDER */);
+
     /// <summary>En píxeles físicos: con pantallas de distinta escala, las unidades de WPF no sirven para alinear al borde.</summary>
     public static void Colocar(nint ventana, Rect r) =>
         SetWindowPos(ventana, HWND_TOPMOST, r.Izquierda, r.Arriba, r.Derecha - r.Izquierda, r.Abajo - r.Arriba, SWP_NOACTIVATE);
@@ -91,18 +95,20 @@ internal static partial class Sistema
     private static partial int GetDpiForMonitor(nint monitor, int tipo, out uint dpiX, out uint dpiY);
 
     /// <summary>
-    /// El área de trabajo (sin la barra de tareas) y la escala del monitor que
-    /// contiene el punto. Si ese monitor ya no está conectado, el principal.
+    /// El monitor completo, su área de trabajo (sin la barra de tareas ni las
+    /// barras reservadas, la de Vigía incluida) y su escala. Si el monitor del
+    /// punto ya no está conectado, el principal.
     /// </summary>
-    public static (Rect Trabajo, double Escala) MonitorEn(Punto p)
+    public static (Rect Completo, Rect Trabajo, double Escala) MonitorEn(Punto p)
     {
         const uint MONITOR_DEFAULTTOPRIMARY = 1;
         nint monitor = MonitorFromPoint(p, MONITOR_DEFAULTTOPRIMARY);
         var info = new InfoMonitor { Tamano = (uint)Marshal.SizeOf<InfoMonitor>() };
         GetMonitorInfo(monitor, ref info);
         double escala = GetDpiForMonitor(monitor, 0, out uint dpi, out _) == 0 ? dpi / 96d : 1;
-        return (info.Trabajo, escala);
+        return (info.Monitor, info.Trabajo, escala);
     }
+
 
     public delegate void ProcesarEventoVentana(nint gancho, uint evento, nint ventana, int objeto, int hijo, uint hilo, uint tiempo);
 

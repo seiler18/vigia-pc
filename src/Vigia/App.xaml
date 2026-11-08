@@ -2,6 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              ShutdownMode="OnExplicitShutdown">
+    <!-- Los pinceles reales los pone Paleta.Aplicar según la configuración;
+         estos son solo el valor inicial para que el XAML compile y se vea algo
+         si algo falla antes. -->
     <Application.Resources>
         <SolidColorBrush x:Key="TextoPrincipal" Color="#E8EAED" />
         <SolidColorBrush x:Key="TextoSecundario" Color="#9AA0A6" />

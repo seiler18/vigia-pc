@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using Forms = System.Windows.Forms;
@@ -17,52 +16,38 @@ internal sealed partial class Bandeja : IDisposable
     private const string NombreInicio = "Vigia";
 
     private readonly Forms.NotifyIcon _icono;
-    private readonly Dictionary<Nivel, Dibujo.Icon> _iconos;
+    private Dictionary<Nivel, Dibujo.Icon> _iconos;
     private readonly Configuracion _config;
     private readonly Franja _franja;
-    private readonly Forms.ToolStripMenuItem _mostrar, _compacto, _fijar, _inicio;
+    private readonly Forms.ToolStripMenuItem _mostrar, _fijar, _inicio;
     private readonly Dictionary<string, DateTime> _ultimoAviso = [];
     private Nivel _nivelActual = Nivel.SinDato;
 
     public event Action? SalirPedido;
+    public event Action? PersonalizarPedido;
 
     public Bandeja(Configuracion config, Franja franja)
     {
         _config = config;
         _franja = franja;
-        _iconos = Enum.GetValues<Nivel>().ToDictionary(n => n, n => CrearIcono(Paleta.De(n).Color));
+        _iconos = CrearIconos();
 
         _mostrar = new Forms.ToolStripMenuItem("Mostrar franja", null, (_, _) => AlternarVisibilidad())
         { ShortcutKeyDisplayString = "Ctrl+Shift+F11", Checked = true };
-        _compacto = new Forms.ToolStripMenuItem("Modo mínimo", null, (_, _) => AlternarCompacto())
-        { Checked = config.Compacto, ShortcutKeyDisplayString = "doble clic" };
         _fijar = new Forms.ToolStripMenuItem("Fijar y dejar pasar los clics", null, (_, _) => AlternarFijado())
         { Checked = config.Fijado };
         _inicio = new Forms.ToolStripMenuItem("Iniciar con Windows", null, (_, _) => AlternarInicio())
         { Checked = IniciaConWindows() };
 
-        var opacidad = new Forms.ToolStripMenuItem("Opacidad");
-        foreach (var valor in new[] { 1.0, 0.9, 0.75, 0.6 })
-        {
-            var item = new Forms.ToolStripMenuItem($"{valor * 100:0} %", null, (s, _) =>
-            {
-                _config.Opacidad = valor;
-                _config.Guardar();
-                _franja.AplicarOpacidad();
-                foreach (Forms.ToolStripMenuItem o in opacidad.DropDownItems) o.Checked = o == s;
-            })
-            { Checked = Math.Abs(config.Opacidad - valor) < 0.01 };
-            opacidad.DropDownItems.Add(item);
-        }
-
         var menu = new Forms.ContextMenuStrip();
         menu.Items.AddRange(
         [
-            _mostrar, _compacto, _fijar, opacidad,
+            new Forms.ToolStripMenuItem("Personalizar…", null, (_, _) => PersonalizarPedido?.Invoke())
+            { ShortcutKeyDisplayString = "doble clic", Font = new Dibujo.Font(menu.Font, Dibujo.FontStyle.Bold) },
+            _mostrar, _fijar,
             new Forms.ToolStripMenuItem("Volver a la pantalla principal", null, (_, _) => _franja.VolverAPantallaPrincipal()),
             new Forms.ToolStripSeparator(),
             _inicio,
-            new Forms.ToolStripMenuItem("Editar umbrales…", null, (_, _) => AbrirConfiguracion()),
             new Forms.ToolStripSeparator(),
             new Forms.ToolStripMenuItem("Salir", null, (_, _) => SalirPedido?.Invoke()),
         ]);
@@ -77,13 +62,24 @@ internal sealed partial class Bandeja : IDisposable
         _icono.MouseClick += (_, e) => { if (e.Button == Forms.MouseButtons.Left) AlternarVisibilidad(); };
 
         _franja.AtajoPresionado += AlternarVisibilidad;
-        _franja.ModoCambiado += () => _compacto.Checked = _config.Compacto;
+    }
+
+    private Dictionary<Nivel, Dibujo.Icon> CrearIconos() =>
+        Enum.GetValues<Nivel>().ToDictionary(n => n, n => CrearIcono(n == Nivel.SinDato ? null : Paleta.De(n).Color));
+
+    /// <summary>Al cambiar los colores de aviso (p. ej. a los de daltonismo), el icono los sigue.</summary>
+    public void RefrescarIconos()
+    {
+        var viejos = _iconos;
+        _iconos = CrearIconos();
+        _icono.Icon = _iconos[_nivelActual];
+        foreach (var i in viejos.Values) i.Dispose();
     }
 
     public void PrimerUso()
     {
         _icono.ShowBalloonTip(6000, "Vigía está en la bandeja",
-            "Arrastra la franja a otra pantalla o al otro borde. Doble clic: modo mínimo. Ctrl+Shift+F11: mostrar u ocultar. Clic derecho en este icono: opciones.",
+            "Arrastra la franja a cualquier borde o pantalla. Doble clic: personalizar. Ctrl+Shift+F11: mostrar u ocultar.",
             Forms.ToolTipIcon.None);
     }
 
@@ -120,14 +116,6 @@ internal sealed partial class Bandeja : IDisposable
         _mostrar.Checked = _franja.IsVisible;
     }
 
-    private void AlternarCompacto()
-    {
-        _config.Compacto = !_config.Compacto;
-        _config.Guardar();
-        _franja.AplicarModo();
-        _compacto.Checked = _config.Compacto;
-    }
-
     private void AlternarFijado()
     {
         _config.Fijado = !_config.Fijado;
@@ -150,30 +138,46 @@ internal sealed partial class Bandeja : IDisposable
         _inicio.Checked = IniciaConWindows();
     }
 
-    private void AbrirConfiguracion()
+    /// <summary>
+    /// El logo de la marca con el visto pintado del color del estado: se
+    /// reconoce como Vigía entre los demás iconos de la bandeja y sigue
+    /// avisando aunque la franja esté oculta. Un punto encima tapaba justo el
+    /// visto, que es lo que identifica el logo. Sin dato aún, el logo tal cual.
+    /// </summary>
+    private static Dibujo.Icon CrearIcono(System.Windows.Media.Color? estado)
     {
-        _config.Guardar();
-        Process.Start(new ProcessStartInfo("notepad.exe", $"\"{Configuracion.Ruta}\"") { UseShellExecute = true });
-    }
-
-    /// <summary>Un círculo del color del estado; se dibuja en vez de traer archivos .ico.</summary>
-    private static Dibujo.Icon CrearIcono(System.Windows.Media.Color color)
-    {
-        using var mapa = new Dibujo.Bitmap(32, 32);
-        using (var g = Dibujo.Graphics.FromImage(mapa))
-        {
-            g.SmoothingMode = Dibujo.Drawing2D.SmoothingMode.AntiAlias;
-            using var fondo = new Dibujo.SolidBrush(Dibujo.Color.FromArgb(0x14, 0x17, 0x1C));
-            using var punto = new Dibujo.SolidBrush(Dibujo.Color.FromArgb(color.R, color.G, color.B));
-            g.FillEllipse(fondo, 1, 1, 30, 30);
-            g.FillEllipse(punto, 8, 8, 16, 16);
-        }
+        var recurso = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/Recursos/vigia.ico"));
+        using var logo = new Dibujo.Icon(recurso!.Stream, 32, 32);
+        using var mapa = logo.ToBitmap();
+        if (estado is { } c) PintarVisto(mapa, c);
         nint h = mapa.GetHicon();
         // GetHicon crea un handle que Icon no libera solo: se clona y se
         // destruye el original para no filtrar handles GDI.
         var icono = (Dibujo.Icon)Dibujo.Icon.FromHandle(h).Clone();
         DestroyIcon(h);
         return icono;
+    }
+
+    /// <summary>
+    /// Los píxeles del visto son mezclas entre el turquesa (#2DD4BF) y el azul
+    /// de la baldosa (#0A2B45) por el suavizado de bordes. Se mide cuánto
+    /// turquesa tiene cada uno por la diferencia verde − rojo (167 en el
+    /// turquesa, 33 en el azul, ~6 en el blanco de las letras, que así no se
+    /// toca) y se reemplaza por la misma mezcla con el color del estado.
+    /// </summary>
+    private static void PintarVisto(Dibujo.Bitmap mapa, System.Windows.Media.Color estado)
+    {
+        const double Fondo = 33, Turquesa = 167;
+        for (int y = 0; y < mapa.Height; y++)
+        for (int x = 0; x < mapa.Width; x++)
+        {
+            var p = mapa.GetPixel(x, y);
+            double mezcla = (p.G - p.R - Fondo) / (Turquesa - Fondo);
+            if (mezcla <= 0.2 || p.A == 0) continue;
+            mezcla = Math.Min(1, mezcla);
+            int Canal(byte fondo, byte color) => (int)Math.Round(fondo + mezcla * (color - fondo));
+            mapa.SetPixel(x, y, Dibujo.Color.FromArgb(p.A, Canal(0x0A, estado.R), Canal(0x2B, estado.G), Canal(0x45, estado.B)));
+        }
     }
 
     [LibraryImport("user32.dll")]

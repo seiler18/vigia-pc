@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 24 464 464" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Icono de Vigía: el isotipo de la marca (Curriculo/assets/img/marca/favicon.svg,
+       el JS con la flecha y el visto) sobre una baldosa azul marino, con los
+       colores de la variante oscura para que se lea en barras de tareas
+       claras y oscuras. Colores en atributos y no en style: ImageMagick
+       ignora el bloque style al rasterizar. Si cambia el logo de la marca,
+       se cambia aquí y se regenera vigia.ico (ver CLAUDE.md). -->
+  <rect x="10" y="24" width="464" height="464" rx="104" fill="#0a2b45" />
+  <g transform="translate(242 256) scale(0.8) translate(-242 -256)">
+    <path stroke="#e2e8f0" stroke-width="34" d="M64 214 H128 M110 214 V336 A42 42 0 0 1 26 336" />
+    <path stroke="#e2e8f0" stroke-width="34" d="M144 366 C154 386 172 396 196 396 C226 396 248 376 248 348 C248 320 228 306 198 296 C168 286 148 274 148 248 C148 222 166 206 194 206 L222 206 L258 168 L282 192 L322 146" />
+    <path stroke="#e2e8f0" fill="#e2e8f0" stroke-width="8" d="M362 98 L352 166 L298 121 Z" />
+    <circle stroke="#2dd4bf" stroke-width="26" cx="370" cy="310" r="86" />
+    <path stroke="#2dd4bf" stroke-width="32" d="M326 308 L358 342 L418 272" />
+  </g>
+</svg>

@@ -10,9 +10,11 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- El isotipo de la marca. Se genera de Recursos/vigia.svg (ver CLAUDE.md). -->
+    <ApplicationIcon>Recursos\vigia.ico</ApplicationIcon>
     <AssemblyName>Vigia</AssemblyName>
     <Product>Vigía</Product>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>Jesus Seiler</Authors>
     <SatelliteResourceLanguages>es</SatelliteResourceLanguages>
     <!-- packages.lock.json fija la versión exacta y el hash de cada paquete,
@@ -21,6 +23,10 @@
          RuntimeIdentifiers mete en el candado también lo que usa la
          publicación autónoma para win-x64. -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- WPF0001: ThemeMode (el tema Fluent de Windows 11) sigue marcado como
+         experimental en .NET 10. Se usa solo en «Personalizar»; si cambiara su
+         API, lo que se rompe es el aspecto de esa ventana, no la franja. -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
@@ -33,6 +39,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.2.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Dentro del ensamblado: lo usan la ventana «Personalizar» y el icono
+         de la bandeja, y el .exe es un solo archivo. -->
+    <Resource Include="Recursos\vigia.ico" />
   </ItemGroup>
 
   <!-- TraceEvent copia KernelTraceControl y msdia140 (2,5 MB por arquitectura)

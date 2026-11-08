@@ -1,6 +1,6 @@
 # Vigía
 
-Una franja delgada, a todo lo ancho de la pantalla, con la temperatura de la
+Una franja delgada pegada a un borde de la pantalla, con la temperatura de la
 GPU y del CPU, los FPS del juego y el uso de RAM. Sirve para vigilar el equipo
 mientras se juega y ver venir el sobrecalentamiento antes de que el equipo
 empiece a bajar su propio rendimiento.
@@ -30,24 +30,38 @@ dedicada, un error común en notebooks que se nota como FPS bajos sin motivo.
 - **No instala drivers ni pide administrador.** La temperatura de la GPU sale
   de la misma interfaz que usa el Administrador de tareas, y la del CPU, de la
   zona térmica ACPI.
-- **No le roba el foco al juego.** Arrastrarla o hacerle doble clic no
-  minimiza el juego ni suelta el mouse.
+- **No le roba el foco al juego.** Arrastrarla no minimiza el juego ni
+  suelta el mouse.
+- **No tapa otras ventanas.** Reserva su espacio como la barra de tareas: una
+  ventana maximizada termina donde empieza la franja y sus botones de
+  minimizar y cerrar quedan a la vista.
 - **No compite por recursos.** Dibuja con la CPU (no toca la GPU del juego),
   corre con prioridad baja y en modo de eficiencia de Windows. Medido en un
-  Ryzen 5 4600H con un juego abierto: 0,06 % de CPU y 45 MB de RAM.
+  Ryzen 5 4600H con un juego abierto: menos del 0,1 % de CPU y unos 45 MB
+  de RAM.
 
 ## Uso
 
-- **Arrastrar** la franja lleva a otra pantalla o al otro borde (arriba o
-  abajo); al soltarla se acomoda sola.
-- **Doble clic**: modo mínimo, solo los valores principales.
-- **Ctrl+Shift+F11**: mostrar u ocultar desde dentro del juego.
-- **Icono de la bandeja**: se pinta del color del estado. Clic derecho para
-  opacidad, fijarla para que deje pasar los clics, iniciar con Windows y
-  editar los umbrales.
+- **Arrastrar**: al soltarla se pega al borde más cercano de esa pantalla.
+  Arriba y abajo es una fila; a la izquierda y a la derecha, una columna con
+  un bloque por componente.
+- **Doble clic**: abre **Personalizar**, donde se elige:
+  - borde, tamaño y si reserva el espacio;
+  - color de fondo y de texto (muestras o cualquier `#RRGGBB`), opacidad, y
+    colores de aviso: verde · ámbar · rojo, o azul · naranja · rosa para
+    daltonismo;
+  - qué mostrar (FPS, GPU, CPU, RAM, tendencias) o el modo mínimo;
+  - los umbrales de atención y crítico.
 
-Los umbrales están en `%APPDATA%\Vigia\config.json` y se aplican al guardar,
-sin reiniciar:
+  Los cambios se ven al instante en la franja.
+- **Ctrl+Shift+F11**: mostrar u ocultar desde dentro del juego.
+- **Icono de la bandeja**: el logo con el visto pintado del color del estado.
+  Clic derecho: personalizar, fijar la franja para que deje pasar los clics,
+  volver a la pantalla principal e iniciar con Windows.
+- `Vigia.exe --personalizar` abre directo en Personalizar (útil para un
+  acceso directo).
+
+Umbrales por defecto:
 
 | | Atención | Crítico |
 |---|---|---|
@@ -55,7 +69,9 @@ sin reiniciar:
 | CPU | 85 °C | 95 °C |
 | RAM | 85 % | 95 % |
 
-Al entrar en crítico, Windows muestra un aviso (uno cada 5 minutos por motivo).
+Al entrar en crítico, Windows muestra un aviso (uno cada 5 minutos por
+motivo). La configuración vive en `%APPDATA%\Vigia\config.json`; si se edita
+a mano, se aplica al guardar.
 
 ## Requisitos
 

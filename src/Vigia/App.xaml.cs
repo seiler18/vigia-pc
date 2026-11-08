@@ -15,6 +15,10 @@ public partial class App : Application
     private Recolector? _recolector;
     private Bandeja? _bandeja;
     private FileSystemWatcher? _vigilante;
+    private Franja? _franja;
+    private Ajustes? _ajustes;
+    private Configuracion _config = new();
+    private string _coloresEstado = "";
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -30,6 +34,9 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException += (_, a) =>
         {
             if (a.ExceptionObject is Exception ex) Registro.Anotar("Error fatal", ex);
+            // Si no, el espacio reservado quedaría como un hueco vacío en el
+            // borde de la pantalla hasta reiniciar el Explorador.
+            _franja?.QuitarReserva();
         };
 
         // Una sola instancia: con «Iniciar con Windows» activo es fácil abrir
@@ -50,12 +57,16 @@ public partial class App : Application
         Sistema.ActivarModoEficiencia();
 
         bool primerUso = !File.Exists(Configuracion.Ruta);
-        var config = Configuracion.Cargar();
+        var config = _config = Configuracion.Cargar();
         config.Guardar();
+        Paleta.Aplicar(config);
+        _coloresEstado = config.ColoresEstado;
 
-        var franja = new Franja(config);
+        var franja = _franja = new Franja(config);
         _bandeja = new Bandeja(config, franja);
         _bandeja.SalirPedido += Shutdown;
+        _bandeja.PersonalizarPedido += AbrirAjustes;
+        franja.PersonalizarPedido += AbrirAjustes;
         franja.Show();
         if (primerUso) _bandeja.PrimerUso();
 
@@ -71,11 +82,40 @@ public partial class App : Application
         _recolector.Iniciar();
 
         VigilarConfiguracion(config);
+
+        // Para un acceso directo que abra Vigía directo en «Personalizar».
+        if (e.Args.Contains("--personalizar", StringComparer.OrdinalIgnoreCase)) AbrirAjustes();
+    }
+
+    private void AbrirAjustes()
+    {
+        if (_ajustes is not null)
+        {
+            _ajustes.Activate();
+            return;
+        }
+        _ajustes = new Ajustes(_config);
+        _ajustes.Cambio += AplicarConfiguracion;
+        _ajustes.Closed += (_, _) => _ajustes = null;
+        _ajustes.Show();
+    }
+
+    /// <summary>Lleva un cambio de configuración a la franja y al icono, sin reiniciar.</summary>
+    private void AplicarConfiguracion()
+    {
+        Paleta.Aplicar(_config);
+        _franja?.AplicarConfiguracion();
+        if (_config.ColoresEstado != _coloresEstado)
+        {
+            _coloresEstado = _config.ColoresEstado;
+            _bandeja?.RefrescarIconos();
+        }
     }
 
     /// <summary>
-    /// Los umbrales se editan en el JSON con el Bloc de notas; al guardar se
-    /// aplican solos, sin reiniciar Vigía.
+    /// El JSON también se puede editar a mano: al guardarlo se aplica solo.
+    /// Vigía mismo lo reescribe al mover la franja o cerrar «Personalizar»;
+    /// esa recarga trae los mismos valores y no cambia nada.
     /// </summary>
     private void VigilarConfiguracion(Configuracion config)
     {
@@ -86,12 +126,12 @@ public partial class App : Application
         };
         _vigilante.Changed += (_, _) => Dispatcher.BeginInvoke(() =>
         {
+            // Con «Personalizar» abierto manda lo que se ve ahí: recargar el
+            // archivo desharía lo que se está ajustando y aún no se guarda.
+            if (_ajustes is not null) return;
             Thread.Sleep(100); // el Bloc de notas escribe en dos pasos
-            var nueva = Configuracion.Cargar();
-            config.TemperaturaGpu = nueva.TemperaturaGpu;
-            config.TemperaturaCpu = nueva.TemperaturaCpu;
-            config.Ram = nueva.Ram;
-            config.AvisarEnCritico = nueva.AvisarEnCritico;
+            config.CopiarDe(Configuracion.Cargar());
+            AplicarConfiguracion();
         });
     }
 

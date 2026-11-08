@@ -18,13 +18,21 @@ rompe con cada `dotnet clean`.
    Get-Process Vigia -ErrorAction SilentlyContinue | Stop-Process -Force
    ```
 
-2. Publicar directo a la carpeta de instalación:
+2. Restaurar con el candado y publicar **sin** restaurar de nuevo, directo a
+   la carpeta de instalación. El orden importa: un `publish` que restaura por
+   su cuenta (con `PublishSingleFile`) mete `Microsoft.NET.ILLink.Tasks` en
+   `packages.lock.json`, y ese candado rompe CI con `NU1004` (pasó dos veces
+   el 2026-11-07). Es lo mismo que hace `publicar.yml`.
 
    ```powershell
-   dotnet publish src/Vigia -c Release -r win-x64 --self-contained false `
+   dotnet restore src/Vigia --locked-mode
+   dotnet publish src/Vigia -c Release -r win-x64 --self-contained false --no-restore `
      -p:PublishSingleFile=true -p:DebugType=none `
      -o "$env:LOCALAPPDATA\Programs\Vigia"
    ```
+
+   Si aun así `git status` muestra `packages.lock.json` cambiado sin haber
+   tocado paquetes: `git checkout -- src/Vigia/packages.lock.json`.
 
 3. Abrirlo y comprobar que sigue vivo a los 10 s:
 

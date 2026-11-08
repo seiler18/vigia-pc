@@ -10,5 +10,6 @@ Para añadir un hito, ver la skill `registrar-hito`.
 
 | # | Fecha | Título | Estado |
 |---|---|---|---|
+| [0003](0003-cuatro-bordes-reservar-espacio-personalizar-e-icono.md) | 2026-11-07 | Cuatro bordes, reservar espacio, «Personalizar» e icono de la marca | completado |
 | [0002](0002-auditoria-de-seguridad-y-v0-1-0.md) | 2026-11-07 | Auditoría de seguridad y publicación de la v0.1.0 | completado |
 | [0001](0001-franja-de-temperatura-y-fps.md) | 2026-11-07 | Franja de temperatura y FPS, sin driver ni inyección | completado |

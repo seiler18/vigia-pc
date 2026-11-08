@@ -1,31 +1,41 @@
 <UserControl x:Class="Vigia.Interfaz.Segmento"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             HorizontalAlignment="Center" VerticalAlignment="Center">
-    <!-- Un componente en una línea, en el orden en que importa: qué es, qué
-         tan caliente, hacia dónde va, qué tan cargado y el detalle. En modo
-         mínimo quedan solo los dos primeros. -->
-    <StackPanel Orientation="Horizontal">
+             VerticalAlignment="Center">
+    <!-- Un componente: qué es, qué tan caliente, hacia dónde va, qué tan
+         cargado y el detalle. La posición de cada pieza la decide Orientar():
+         en fila en los bordes de arriba y abajo, en bloque en los costados. -->
+    <Grid x:Name="Raiz">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
         <TextBlock x:Name="Titulo" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
-                   Foreground="{StaticResource TextoSecundario}" Margin="0,0,6,0" />
+                   Foreground="{DynamicResource TextoSecundario}" />
         <TextBlock x:Name="Valor" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"
-                   MinWidth="30" TextAlignment="Right"
-                   Foreground="{StaticResource TextoPrincipal}" Typography.NumeralAlignment="Tabular" />
+                   Foreground="{DynamicResource TextoPrincipal}" Typography.NumeralAlignment="Tabular" />
 
         <!-- Tendencia de los últimos 2 minutos; la punteada es el umbral de
              atención: si la curva se le acerca, hay que mirar. -->
-        <Canvas x:Name="Grafico" Width="56" Height="16" Margin="8,0,0,0" ClipToBounds="True"
+        <Canvas x:Name="Grafico" Width="56" Height="16" ClipToBounds="True"
                 VerticalAlignment="Center" Visibility="Collapsed">
-            <Line x:Name="LineaUmbral" Stroke="{StaticResource TextoTenue}" StrokeThickness="1"
-                  StrokeDashArray="2,3" X1="0" X2="56" />
+            <Line x:Name="LineaUmbral" Stroke="{DynamicResource TextoTenue}" StrokeThickness="1"
+                  StrokeDashArray="2,3" X1="0" />
             <Polyline x:Name="Curva" StrokeThickness="1.5" StrokeLineJoin="Round" />
         </Canvas>
 
-        <TextBlock x:Name="Porcentaje" FontSize="12" VerticalAlignment="Center" Margin="8,0,0,0"
-                   MinWidth="34" TextAlignment="Right"
-                   Foreground="{StaticResource TextoPrincipal}" Typography.NumeralAlignment="Tabular" />
-
-        <TextBlock x:Name="Detalle" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0"
-                   Foreground="{StaticResource TextoSecundario}" Typography.NumeralAlignment="Tabular" />
-    </StackPanel>
+        <TextBlock x:Name="Porcentaje" FontSize="12" VerticalAlignment="Center"
+                   Foreground="{DynamicResource TextoPrincipal}" Typography.NumeralAlignment="Tabular" />
+        <TextBlock x:Name="Detalle" FontSize="11" VerticalAlignment="Center"
+                   Foreground="{DynamicResource TextoSecundario}" Typography.NumeralAlignment="Tabular" />
+    </Grid>
 </UserControl>

@@ -13,30 +13,34 @@
     <!-- Fondo con alfa propio en vez de Window.Opacity: se transparenta la
          franja sin que el texto pierda contraste. -->
     <Grid x:Name="Fondo">
-        <!-- Línea de estado en el borde que mira hacia la pantalla: gris si
-             todo va bien, ámbar o roja si hay que mirar. -->
-        <Border x:Name="LineaEstado" Height="2" VerticalAlignment="Bottom" />
+        <!-- Línea de estado en el borde que mira hacia la pantalla: tenue si
+             todo va bien, del color del aviso si hay que mirar. Su lado lo
+             decide Orientar(). -->
+        <Border x:Name="LineaEstado" />
 
-        <Grid Margin="14,0,14,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="230" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+        <!-- La escala del usuario agranda letra y espacios juntos; el grosor
+             de la ventana se multiplica por lo mismo en Acomodar(). -->
+        <Grid x:Name="Contenido">
+            <Grid.LayoutTransform>
+                <ScaleTransform x:Name="Escala" />
+            </Grid.LayoutTransform>
 
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <Grid x:Name="Estado" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
                 <Ellipse x:Name="PuntoEstado" Width="9" Height="9" VerticalAlignment="Center" Margin="0,1,9,0" />
-                <TextBlock x:Name="TextoEstado" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" />
-            </StackPanel>
+                <TextBlock x:Name="TextoEstado" Grid.Column="1" FontSize="12.5" FontWeight="SemiBold"
+                           VerticalAlignment="Center" TextWrapping="Wrap" />
+            </Grid>
 
             <!-- FPS no lleva tendencia: no hay umbral que vigilar, y su
                  detalle útil es el 1 % bajo (los tirones) y de qué juego es. -->
-            <i:Segmento x:Name="SegFps" Grid.Column="1" TituloTexto="FPS" />
-            <i:Segmento x:Name="SegGpu" Grid.Column="2" TituloTexto="GPU" />
-            <i:Segmento x:Name="SegCpu" Grid.Column="3" TituloTexto="CPU" />
-            <i:Segmento x:Name="SegRam" Grid.Column="4" TituloTexto="RAM" />
+            <i:Segmento x:Name="SegFps" TituloTexto="FPS" />
+            <i:Segmento x:Name="SegGpu" TituloTexto="GPU" />
+            <i:Segmento x:Name="SegCpu" TituloTexto="CPU" />
+            <i:Segmento x:Name="SegRam" TituloTexto="RAM" />
         </Grid>
     </Grid>
 </Window>
